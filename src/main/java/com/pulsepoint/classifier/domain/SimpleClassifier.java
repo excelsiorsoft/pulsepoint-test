@@ -33,59 +33,20 @@ public class SimpleClassifier implements Classifier {
 
     @Override
     public CompletableFuture<String> classify(final String url) {
-       
-    	//LOGGER.info(">>>passed URL: {}", url);
-
     	String category = preprocess(url);
 		if (category != UNKNOWN_CATEGORY) {
 			try {
 				category = httpClient.get(category).get();
-				//System.out.println("+++received category: " + category);
 			} catch (Exception e) {
 				LOGGER.error("Exception while calling WebsiteScaffoldingApplication: {} ", e.getMessage());
 			}
 		}
     	return CompletableFuture.completedFuture(category);
-    	
-/*   	
-    	switch(validatedUrl) {
-    	case "http://localhost:8081/website?url=https://en.wikipedia.org/wiki/Finance":
-    			validatedUrl = "finance";
-    			break;
-    	case "http://localhost:8081/website?url=http://seekingalpha.com/":
-    		validatedUrl = "finance";
-    		break;
-    	case "http://localhost:8081/website?url=https://en.wikipedia.org/wiki/Sports_in_the_United_States":
-    		validatedUrl = "sports";
-    		break;
-    	case "http://localhost:8081/website?url=http://www.nbcnews.com/news/sports":
-    		validatedUrl = "sports";
-    		break;
-    	case "http://localhost:8081/website?url=https://en.wikipedia.org/wiki/Health_care":
-    		validatedUrl = "health";
-    		break;
-    	case "http://localhost:8081/website?url=http://www.webmd.com/":
-    		validatedUrl = "health";
-    		break;
-    	case "http://localhost:8081/website?url=https://en.wikipedia.org/wiki/Politics_of_the_United_States":
-    		validatedUrl = "politics";
-    		break;
-    	case "http://localhost:8081/website?url=https://www.usa.gov/election":
-    		validatedUrl = "politics";
-    		break;
-    	}
-    	*/
-        //return CompletableFuture.completedFuture(validatedUrl);
-        
-        
-        
-        
+       
     }
 
     @Override
-    public CompletableFuture<Double> train(final Classification classification) {
-        
-    	//LOGGER.info("Trained with: {}",classification);
+    public CompletableFuture<Double> train(final Classification classification) {        
         return CompletableFuture.completedFuture(0.0);
     }
     

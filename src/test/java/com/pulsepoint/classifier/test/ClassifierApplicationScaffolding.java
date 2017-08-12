@@ -209,17 +209,14 @@ public class ClassifierApplicationScaffolding extends ExternalResource {
      * @return list of sample test data
      */
     public List<TestData> getTestData() {
-    	
-    	List<TestData> result = 
-       /* return*/ testWebsiteServer.getApplication().getTestData().stream().map(sample ->
+        return testWebsiteServer.getApplication().getTestData().stream().map(sample ->
                 new TestData(sample.category, 
                 		HTTP_LOCALHOST_PREFIX + testWebsiteServer.getPort() +
                         UriBuilder.fromPath(WebsiteScaffoldingApplication.WEBSITE_PATH)
                                 .queryParam(ClassifierResource.URL_PARAM, sample.url)
                                 .build()))
                 .collect(Collectors.toList());
-    	System.out.println("test data: "+result);
-    	return result;
+
     }
 
     /**
@@ -317,14 +314,13 @@ public class ClassifierApplicationScaffolding extends ExternalResource {
             return testData;
         }
 
-        //@SuppressWarnings("VoidMethodAnnotatedWithGET")
+
         @Path(WEBSITE_PATH)
-        //@Produces(MediaType.TEXT_HTML)
         @Produces(MediaType.APPLICATION_JSON)
         @GET
         public void get(@QueryParam(ClassifierResource.URL_PARAM) String url, @Suspended final AsyncResponse asyncResponse) {
             SampleData data = testData.stream().filter(sampleData -> url.equals(sampleData.url)).findFirst().get();
-            executorService.schedule(() -> asyncResponse.resume(data.category/*.content*/), delayMs, TimeUnit.MILLISECONDS);
+            executorService.schedule(() -> asyncResponse.resume(data.category), delayMs, TimeUnit.MILLISECONDS);
         }
 
         @PreDestroy

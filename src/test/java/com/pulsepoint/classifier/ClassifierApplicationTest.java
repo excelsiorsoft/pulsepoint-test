@@ -63,7 +63,6 @@ public class ClassifierApplicationTest {
         scaffolding.getTestData().stream().forEach(ThrowingConsumer.unchecked(testData -> {
             String classification = scaffolding.getRemoteClassifier().classify(testData.getUrl()).get();
             boolean isCorrect = testData.getExpectedCategory().equals(classification);
-            System.out.println(isCorrect);
             if (isCorrect) {
                 correctClassifications.incrementAndGet();
             }
