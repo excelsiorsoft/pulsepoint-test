@@ -76,22 +76,22 @@ public class ClassifierApplicationScaffolding extends ExternalResource {
 
         @Override
         public CompletableFuture<String> classify(String url) {
-            return with(new Callback<String>() {
-            }, callback -> jaxRsClient.target(serverURL + RESOURCE_PATH + CLASSIFY_PATH)
-                    .queryParam(URL_PARAM, url)
-                    .request()
-                    .async()
-                    .get(callback));
+            return with(new Callback<String>() {}, 
+	            		callback -> jaxRsClient.target(serverURL + RESOURCE_PATH + CLASSIFY_PATH)
+	                    .queryParam(URL_PARAM, url)
+	                    .request()
+	                    .async()
+	                    .get(callback));
 
         }
 
         @Override
         public CompletableFuture<Double> train(Classification classification) {
-            return with(new Callback<Double>() {
-            }, callback -> jaxRsClient.target(serverURL + RESOURCE_PATH + TRAIN_PATH)
-                    .request()
-                    .async()
-                    .post(Entity.entity(classification, MediaType.APPLICATION_JSON), callback));
+            return with(new Callback<Double>() {},
+	            		callback -> jaxRsClient.target(serverURL + RESOURCE_PATH + TRAIN_PATH)
+	                    .request()
+	                    .async()
+	                    .post(Entity.entity(classification, MediaType.APPLICATION_JSON), callback));
         }
 
         private static <T> CompletableFuture<T> with(Callback<T> callback, Consumer<Callback<T>> consumer) {
@@ -209,12 +209,17 @@ public class ClassifierApplicationScaffolding extends ExternalResource {
      * @return list of sample test data
      */
     public List<TestData> getTestData() {
-        return testWebsiteServer.getApplication().getTestData().stream().map(sample ->
-                new TestData(sample.category, HTTP_LOCALHOST_PREFIX + testWebsiteServer.getPort() +
+    	
+    	List<TestData> result = 
+       /* return*/ testWebsiteServer.getApplication().getTestData().stream().map(sample ->
+                new TestData(sample.category, 
+                		HTTP_LOCALHOST_PREFIX + testWebsiteServer.getPort() +
                         UriBuilder.fromPath(WebsiteScaffoldingApplication.WEBSITE_PATH)
                                 .queryParam(ClassifierResource.URL_PARAM, sample.url)
                                 .build()))
                 .collect(Collectors.toList());
+    	System.out.println("test data: "+result);
+    	return result;
     }
 
     /**
@@ -235,9 +240,8 @@ public class ClassifierApplicationScaffolding extends ExternalResource {
         testWebsiteServer = new HTTPServer<>(new WebsiteScaffoldingApplication(testDataLocation)).start();
         remoteClassifier = new ClassifierClient(HTTP_LOCALHOST_PREFIX + classifierServer.getPort());
 
-        /* train classifier from trainingdata.json for test purposes */
-        CompletableFuture.allOf(load(trainingDataLocation, new TypeReference<List<Classification>>() {
-        })
+        /* train classifier from training.data.json for test purposes */
+        CompletableFuture.allOf(load(trainingDataLocation, new TypeReference<List<Classification>>() {})
                 .stream().map(classification -> remoteClassifier.train(classification)).collect(Collectors.toList())
                 .toArray((new CompletableFuture[0]))).get();
     }
@@ -301,8 +305,7 @@ public class ClassifierApplicationScaffolding extends ExternalResource {
 
         public WebsiteScaffoldingApplication(String testDataLocation) throws IOException {
             executorService = Executors.newScheduledThreadPool(5, new ThreadFactoryBuilder().setNameFormat(getClass().getSimpleName() + "-scheduler-thread-%d").build());
-            testData = load(testDataLocation, new TypeReference<List<SampleData>>() {
-            });
+            testData = load(testDataLocation, new TypeReference<List<SampleData>>() {});
         }
 
         @Override
@@ -314,13 +317,14 @@ public class ClassifierApplicationScaffolding extends ExternalResource {
             return testData;
         }
 
-        @SuppressWarnings("VoidMethodAnnotatedWithGET")
+        //@SuppressWarnings("VoidMethodAnnotatedWithGET")
         @Path(WEBSITE_PATH)
-        @Produces(MediaType.TEXT_HTML)
+        //@Produces(MediaType.TEXT_HTML)
+        @Produces(MediaType.APPLICATION_JSON)
         @GET
         public void get(@QueryParam(ClassifierResource.URL_PARAM) String url, @Suspended final AsyncResponse asyncResponse) {
             SampleData data = testData.stream().filter(sampleData -> url.equals(sampleData.url)).findFirst().get();
-            executorService.schedule(() -> asyncResponse.resume(data.content), delayMs, TimeUnit.MILLISECONDS);
+            executorService.schedule(() -> asyncResponse.resume(data.category/*.content*/), delayMs, TimeUnit.MILLISECONDS);
         }
 
         @PreDestroy

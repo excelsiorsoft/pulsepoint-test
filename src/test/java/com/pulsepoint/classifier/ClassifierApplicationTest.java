@@ -18,6 +18,8 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.IntStream;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.MINUTES;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
@@ -61,6 +63,7 @@ public class ClassifierApplicationTest {
         scaffolding.getTestData().stream().forEach(ThrowingConsumer.unchecked(testData -> {
             String classification = scaffolding.getRemoteClassifier().classify(testData.getUrl()).get();
             boolean isCorrect = testData.getExpectedCategory().equals(classification);
+            System.out.println(isCorrect);
             if (isCorrect) {
                 correctClassifications.incrementAndGet();
             }
@@ -115,10 +118,10 @@ public class ClassifierApplicationTest {
             /* shut down executor */
             executor.shutdown();
             /* wait for termination */
-            if (!executor.awaitTermination(5, TimeUnit.MINUTES)) {
+            if (!executor.awaitTermination(5, MINUTES)) {
                 fail("Concurrent test took too long to perform.");
             }
-            long testDurationMillis = stopwatch.elapsed(TimeUnit.MILLISECONDS);
+            long testDurationMillis = stopwatch.elapsed(MILLISECONDS);
 
             /* log results */
             LOGGER.info("Performed {} classifications via {} threads in {}ms ({}c/s or {}ms/c)",
