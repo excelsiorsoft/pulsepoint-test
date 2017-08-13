@@ -22,7 +22,7 @@ public interface Classifier {
     CompletableFuture<String> classify(String url);
 
     /**
-     * Train classifier by supplying it some document text and and an explicit category this document belongs to.  The
+     * Train classifier by supplying it some document text and an explicit category this document belongs to.  The
      * returned {@code CompletableFuture} should resolve to an <b>arbitrary</b> double representing information gain
      *
      * @param classification a valid classification
