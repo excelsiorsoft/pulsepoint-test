@@ -314,7 +314,7 @@ public class ClassifierApplicationScaffolding extends ExternalResource {
             return testData;
         }
 
-
+        @SuppressWarnings("VoidMethodAnnotatedWithGET")
         @Path(WEBSITE_PATH)
         @Produces(MediaType.APPLICATION_JSON)
         @GET
