@@ -3,7 +3,10 @@ package com.pulsepoint.classifier.domain;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +21,7 @@ public class SimpleClassifier implements Classifier {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SimpleClassifier.class);
 	
 	private final HTTPClient httpClient;
-	private final Executor executor;
+	private final ExecutorService executor;
 
     /**
      * Construct a simple classifier given an HTTP client and an Executor
@@ -28,12 +31,31 @@ public class SimpleClassifier implements Classifier {
      */
     public SimpleClassifier(final HTTPClient httpClient, final Executor executor) {
     	this.httpClient = httpClient;
-    	this.executor = executor;
+    	this.executor = (ExecutorService) executor;
     }
 
     @Override
-    public CompletableFuture<String> classify(final String url) {
-    	String category = preprocess(url);
+	public CompletableFuture<String> classify(final String url) {
+
+		String doctoredUrl = preprocess(url);
+		if (doctoredUrl != UNKNOWN_CATEGORY) {
+			Future<CompletableFuture<String>> category = (Future<CompletableFuture<String>>) executor.submit(() -> {
+				CompletableFuture<String> cf = null;
+				cf = httpClient.get(doctoredUrl);
+				return cf;
+			});
+			CompletableFuture<String> result = null;
+			try {
+				result = category.get();
+			} catch (InterruptedException | ExecutionException e) {
+				LOGGER.error("Exception while calling WebsiteScaffoldingApplication: {} ", e.getMessage());
+			}
+			return result;
+		} else {
+			return CompletableFuture.completedFuture(UNKNOWN_CATEGORY);
+		}
+    	
+    	/*String category = preprocess(url);
 		if (category != UNKNOWN_CATEGORY) {
 			try {
 				category = httpClient.get(category).get();
@@ -42,7 +64,7 @@ public class SimpleClassifier implements Classifier {
 			}
 		}
     	return CompletableFuture.completedFuture(category);
-       
+       */
     }
 
     @Override
