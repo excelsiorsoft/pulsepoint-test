@@ -1,4 +1,4 @@
-## Web Page Classifier ##
+## Web Page Classifier   (see 'interview' branch)
 
 A JAX-RS service for classifying websites; given a URL, retrieves, parses, and classifies the content of the document into a category.
 
