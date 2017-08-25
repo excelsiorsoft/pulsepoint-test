@@ -38,7 +38,7 @@ public class SimpleClassifier implements Classifier {
 	public CompletableFuture<String> classify(final String url) {
 
 		String doctoredUrl = preprocess(url);
-		if (doctoredUrl != UNKNOWN_CATEGORY) {
+		if (!doctoredUrl.equalsIgnoreCase(UNKNOWN_CATEGORY)) {
 			Future<CompletableFuture<String>> category = (Future<CompletableFuture<String>>) executor.submit(() -> {
 				CompletableFuture<String> cf = null;
 				cf = httpClient.get(doctoredUrl);
